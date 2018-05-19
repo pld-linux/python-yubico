@@ -1,56 +1,58 @@
+#
 # Conditional build:
-%bcond_with	doc	# don't build doc
-%bcond_with	tests	# do not perform "make test"
+%bcond_with	tests	# run tests (requires connected YubiKey USB device)
 %bcond_without	python2 # CPython 2.x module
 %bcond_without	python3 # CPython 3.x module
 #
 %define		module		yubico
 %define		egg_name	python_yubico
-%define		pypi_name	yubico
-Summary:	Python code for talking to Yubico's YubiKeys
-Name:		python-%{pypi_name}
+Summary:	Python 2 code for talking to Yubico's YubiKeys
+Summary(pl.UTF-8):	Kod Pythona 2 do komunikacji z urządzeniami Yubico YubiKey
+Name:		python-%{module}
 Version:	1.3.2
 Release:	1
 License:	BSD
 Group:		Libraries/Python
+# release tarballs:
+#Source0:	https://developers.yubico.com/python-yubico/Releases/%{name}-%{version}.tar.gz
 Source0:	https://github.com/Yubico/python-yubico/archive/%{name}-%{version}.tar.gz
 # Source0-md5:	3012d95a043b1da93486e0b555b95234
-URL:		https://github.com/Yubico/python-yubico
+URL:		https://developers.yubico.com/python-yubico/
 BuildRequires:	rpm-pythonprov
 BuildRequires:	rpmbuild(macros) >= 1.714
 %if %{with python2}
-BuildRequires:	python-modules
+BuildRequires:	python-modules >= 2
+%{?with_tests:BuildRequires:	python-pyusb}
 BuildRequires:	python-setuptools
 %endif
 %if %{with python3}
-BuildRequires:	python3-modules
+BuildRequires:	python3-modules >= 1:3.2
+%{?with_tests:BuildRequires:	python3-pyusb}
 BuildRequires:	python3-setuptools
 %endif
-Requires:	python-modules
+Requires:	python-modules >= 2
+Requires:	python-pyusb
 BuildArch:	noarch
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
-Python code for talking to Yubico's YubiKeys.
+Python 2 code for talking to Yubico's YubiKeys.
+
+%description -l pl.UTF-8
+Kod Pythona 2 do komunikacji z urządzeniami Yubico YubiKey.
 
 %package -n python3-%{module}
-Summary:	Python code for talking to Yubico's YubiKeys
+Summary:	Python 3 code for talking to Yubico's YubiKeys
+Summary(pl.UTF-8):	Kod Pythona 3 do komunikacji z urządzeniami Yubico YubiKey
 Group:		Libraries/Python
-Requires:	python3-modules
+Requires:	python3-modules >= 1:3.2
+Requires:	python3-pyusb
 
 %description -n python3-%{module}
-Python code for talking to Yubico's YubiKeys.
+Python 2 code for talking to Yubico's YubiKeys.
 
-%package apidocs
-Summary:	%{module} API documentation
-Summary(pl.UTF-8):	Dokumentacja API %{module}
-Group:		Documentation
-
-%description apidocs
-API documentation for %{module}.
-
-%description apidocs -l pl.UTF-8
-Dokumentacja API %{module}.
+%description -n python3-%{module} -l pl.UTF-8
+Kod Pythona 3 do komunikacji z urządzeniami Yubico YubiKey.
 
 %prep
 %setup -q -n %{name}-%{name}-%{version}
@@ -62,12 +64,6 @@ Dokumentacja API %{module}.
 
 %if %{with python3}
 %py3_build %{?with_tests:test}
-%endif
-
-%if %{with doc}
-cd docs
-%{__make} -j1 html
-rm -rf _build/html/_sources
 %endif
 
 %install
@@ -82,7 +78,6 @@ rm -rf $RPM_BUILD_ROOT
 %py3_install
 %endif
 
-# in case there are examples provided
 %if %{with python2}
 install -d $RPM_BUILD_ROOT%{_examplesdir}/python-%{module}-%{version}
 cp -a examples/* $RPM_BUILD_ROOT%{_examplesdir}/python-%{module}-%{version}
@@ -102,7 +97,7 @@ rm -rf $RPM_BUILD_ROOT
 %if %{with python2}
 %files
 %defattr(644,root,root,755)
-%doc NEWS README
+%doc COPYING NEWS README
 %{py_sitescriptdir}/%{module}
 %{py_sitescriptdir}/%{egg_name}-%{version}-py*.egg-info
 %{_examplesdir}/python-%{module}-%{version}
@@ -111,14 +106,8 @@ rm -rf $RPM_BUILD_ROOT
 %if %{with python3}
 %files -n python3-%{module}
 %defattr(644,root,root,755)
-%doc NEWS README
+%doc COPYING NEWS README
 %{py3_sitescriptdir}/%{module}
 %{py3_sitescriptdir}/%{egg_name}-%{version}-py*.egg-info
 %{_examplesdir}/python3-%{module}-%{version}
-%endif
-
-%if %{with doc}
-%files apidocs
-%defattr(644,root,root,755)
-%doc docs/_build/html/*
 %endif
