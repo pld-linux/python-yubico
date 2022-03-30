@@ -10,7 +10,7 @@ Summary:	Python 2 code for talking to Yubico's YubiKeys
 Summary(pl.UTF-8):	Kod Pythona 2 do komunikacji z urządzeniami Yubico YubiKey
 Name:		python-%{module}
 Version:	1.3.2
-Release:	6
+Release:	7
 License:	BSD
 Group:		Libraries/Python
 # release tarballs:
